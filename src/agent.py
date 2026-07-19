@@ -1,36 +1,22 @@
 import asyncio
-import json
 
 from langchain_core.messages import BaseMessage
-from langchain.tools import tool
 from langchain.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_ollama.chat_models import ChatOllama
 
-from langchain_protocol.protocol import ToolCall
-from rich import print
-
-
-@tool
-async def get_age() -> int:
-    """Returns the user age."""
-    return 18
-
-
-@tool
-def get_user_name() -> str:
-    """Returns the user name."""
-    return "Yuri Teixeira"
+import tools
+import utils
 
 
 async def main():
     llm = ChatOllama(
         model="qwen2.5:7b",
-        temperature=1.0,
+        temperature=0.15,
     )
 
-    llm = llm.bind_tools([get_age, get_user_name])
+    llm = llm.bind_tools(tools.get_tools())
 
-    messages: list[BaseMessage] = []
+    messages: list[BaseMessage] = [await utils.load_system_prompt()]
 
     while True:
         msg = input("> ")
@@ -44,17 +30,13 @@ async def main():
 
         if output.tool_calls:
             for tool_call in output.tool_calls:
-                content = json.dumps({})
-                if tool_call["name"] == "get_age":
-                    result = await get_age.ainvoke(tool_call["args"])
-                    content = json.dumps({"age": result})
-                elif tool_call["name"] == "get_user_name":
-                    result = await get_user_name.ainvoke(tool_call["args"])
-                    content = json.dumps({"name": result})
+                result = await getattr(
+                    tools, tool_call["name"]
+                ).ainvoke(tool_call["args"])
 
                 messages.append(
                     ToolMessage(
-                        content=content,
+                        content=result,
                         tool_call_id=tool_call["id"]
                     )
                 )
