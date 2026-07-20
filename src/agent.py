@@ -27,12 +27,14 @@ async def main():
         if msg == "/quit":
             break
 
-        messages.append(HumanMessage(msg))
+        messages.append(
+            HumanMessage(msg)
+        )
 
-        output: AIMessage = await llm.ainvoke(messages)
-        messages.append(output) # type: ignore
+        output: AIMessage = await utils.stream_output(llm, messages)
+        messages.append(output)
 
-        if output.tool_calls:
+        while output.tool_calls:
             for tool_call in output.tool_calls:
                 result = await tools_map[
                     tool_call["name"]
@@ -45,10 +47,8 @@ async def main():
                     )
                 )
 
-            output = await llm.ainvoke(messages)
+            output = await utils.stream_output(llm, messages)
             messages.append(output)
-
-        print(output.content)
 
 
 if __name__ == "__main__":
