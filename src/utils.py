@@ -1,18 +1,13 @@
+from pathlib import Path
 from typing import TypedDict
 
 import aiofiles
-from langchain.chat_models import BaseChatModel
-from langchain.messages import AIMessage, AIMessageChunk, SystemMessage
+from langchain.messages import AIMessage, AIMessageChunk
 from langchain_core.messages import BaseMessage
 from langchain_core.runnables import Runnable
 from langchain_ollama import OllamaEmbeddings
 from chromadb.utils.embedding_functions import register_embedding_function
 from chromadb import EmbeddingFunction
-
-
-async def load_system_prompt() -> SystemMessage:
-    async with aiofiles.open("src/prompts/SYSTEM.md") as file:
-        return SystemMessage(await file.read())
 
 
 class ChromaDBConfig(TypedDict):
@@ -46,3 +41,8 @@ async def stream_output(llm: Runnable, messages: list[BaseMessage]) -> AIMessage
         content=output.content if output else "",
         tool_calls=output.tool_calls if output else []
     )
+
+
+async def read_file(filepath: str | Path) -> str:
+    async with aiofiles.open(filepath) as file:
+        return await file.read()

@@ -20,8 +20,7 @@ class DocumentRepository:
         """Inserts or replace a document associated with a session."""
         await self._collection.delete(
             where={
-                "session_id": session_id,
-                "name": name
+                "$and": [{"session_id": session_id}, {"name": name}],
             }
         )
 
