@@ -1,7 +1,7 @@
 [project]
 name = "laika"
 version = "0.1.0"
-description = "Add your description here"
+description = "Um agente de IA coberto por uma API projetado para ser um assistente de estudos."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

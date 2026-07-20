@@ -12,7 +12,7 @@ class DocumentRepository:
         self._client = client
 
     async def initialize(self) -> None:
-        self._collection = await self._client.get_or_create_collection(
+        self._collection: AsyncCollection = await self._client.get_or_create_collection(
             "laika", embedding_function=utils.LaikaEmbeddingFunction()
         )
 
@@ -43,6 +43,7 @@ class DocumentRepository:
             where={
                 "session_id": session_id
             },
+            include=["documents", "metadatas"],
             n_results=5
         )
 

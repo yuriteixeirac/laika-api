@@ -1,10 +1,11 @@
 import asyncio
 
+from langchain.tools import BaseTool
 from langchain_core.messages import BaseMessage
 from langchain.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_ollama.chat_models import ChatOllama
 
-import tools
+from tools import load_tools
 import utils
 
 
@@ -14,7 +15,10 @@ async def main():
         temperature=0.15,
     )
 
-    llm = llm.bind_tools(tools.get_tools())
+    tools: list[BaseTool] = await load_tools()
+    llm = llm.bind_tools(tools)
+
+    tools_map = {tool.name: tool for tool in tools}
 
     messages: list[BaseMessage] = [await utils.load_system_prompt()]
 
@@ -30,9 +34,9 @@ async def main():
 
         if output.tool_calls:
             for tool_call in output.tool_calls:
-                result = await getattr(
-                    tools, tool_call["name"]
-                ).ainvoke(tool_call["args"])
+                result = await tools_map[
+                    tool_call["name"]
+                ].ainvoke(tool_call["args"])
 
                 messages.append(
                     ToolMessage(

@@ -1,5 +1,4 @@
-from types import CoroutineType
-from typing import Any, TypedDict
+from typing import TypedDict
 
 import aiofiles
 from langchain.messages import SystemMessage
@@ -24,5 +23,5 @@ class LaikaEmbeddingFunction(EmbeddingFunction):
     def __init__(self, model: str = "nomic-embed-text") -> None:
         self._embeddings = OllamaEmbeddings(model=model)
 
-    async def __call__(self, input: list[str]) -> CoroutineType[Any, Any, list[list[float]]]:   # type: ignore
-        return await self._embeddings.aembed_documents(input)   # type: ignore
+    def __call__(self, input: list[str]) -> list[list[float]]:    # type: ignore
+        return self._embeddings.embed_documents(input)
