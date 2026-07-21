@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TypedDict
 
 import aiofiles
@@ -7,14 +8,18 @@ from chromadb.utils.embedding_functions import register_embedding_function
 from chromadb import EmbeddingFunction
 
 
-async def load_system_prompt() -> SystemMessage:
-    async with aiofiles.open("src/prompts/SYSTEM.md") as file:
-        return SystemMessage(await file.read())
-
-
 class ChromaDBConfig(TypedDict):
     host: str
     port: int
+
+
+class SQLiteConfig(TypedDict):
+    filepath: str | Path
+
+
+async def load_system_prompt() -> SystemMessage:
+    async with aiofiles.open("src/prompts/SYSTEM.md") as file:
+        return SystemMessage(await file.read())
 
 
 @register_embedding_function
