@@ -1,19 +1,19 @@
-from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException
 from src.models import Session
 
 from src.models.schemas import SessionInput
+from src.repositories.chromadb_singleton import get_document_repository
+from src.repositories.document_repository import DocumentRepository
 from src.repositories.session_repository import SessionRepository
 from src import utils
 
 
-session_router = APIRouter()
+session_router = APIRouter(prefix="/sessions")
 
 
-@session_router.get("/sessions/")
+@session_router.get("/")
 async def list_sessions(
     session_repository: SessionRepository = Depends(
         utils.get_session_repository
@@ -23,7 +23,7 @@ async def list_sessions(
     return sessions
 
 
-@session_router.get("/sessions/{session_id}/")
+@session_router.get("/{session_id}")
 async def get_session(
     session_id: int,
     repo: SessionRepository = Depends(
@@ -36,48 +36,44 @@ async def get_session(
     return session
 
 
-@session_router.post("/sessions/")
+@session_router.post("/")
 async def add_session(
-    session_input: SessionInput,
+    request: SessionInput,
     repo: SessionRepository = Depends(
         utils.get_session_repository
     )
 ) -> Session:
-    session = Session(
-        title=session_input.title,
-        created_at=datetime.utcnow()
-    )
-    await repo.add(session)
+    session = Session(title=request.title)
+    session.id = await repo.add(session)
     return session
 
 
-@session_router.delete("/sessions/{session_id}/", status_code=200)
+@session_router.delete("/{session_id}", status_code=204)
 async def remove_session(
     session_id: int,
-    repo: SessionRepository = Depends(
-        utils.get_session_repository
-    )
+    ses_repo: SessionRepository = Depends(utils.get_session_repository),
+    doc_repo: DocumentRepository = Depends(get_document_repository)
 ):
-    if not await repo.exists(session_id=session_id):
+    if not await ses_repo.exists(session_id=session_id):
         raise HTTPException(status_code=404)
 
-    await repo.remove(session_id)
-    return JSONResponse(content={
-        "detail": "deleted succesfully."
-    })
+    await ses_repo.remove(session_id)
+    await doc_repo.delete_from_session(session_id)
 
 
-@session_router.patch("/sessions/")
+@session_router.patch("/{session_id}")
 async def update_session(
-    session: Session,
+    session_id: int,
+    request: SessionInput,
     repo: SessionRepository = Depends(
         utils.get_session_repository
     )
 ) -> Session:
-    if not session.id:
-        raise HTTPException(status_code=403)
-
-    if not await repo.exists(session.id):
+    if not await repo.exists(session_id):
         raise HTTPException(status_code=404)
 
+    session = Session(
+        id=session_id,
+        title=request.title
+    )
     return await repo.update(session)

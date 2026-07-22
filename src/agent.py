@@ -2,20 +2,20 @@ import asyncio
 from typing import Optional
 
 from langchain.tools import BaseTool
-from langchain.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.messages import BaseMessage
 from langchain_ollama import ChatOllama
 
 from repositories.chromadb_singleton import get_document_repository
 from models.session import Session
 from repositories.session_repository import SessionRepository
+from src.repositories.sqlite_singleton import SqliteSingleton
 from tools import load_tools
 import utils
 
 # TODO:
-# antes de iniciar o modelo,
-# implementar interface de criação
-# e leitura de sessões
+# PROVIDENCIAR ESSE AGENT ATRAVÉS DE UM SINGLETON
+# A CADA MENSAGEM, SALVAR NO BANCO PARA HISTÓRICO
 
 
 async def main():
@@ -29,7 +29,7 @@ async def main():
 
     SESSION_ID: Optional[int] = None
 
-    session_repository = SessionRepository(conn=await utils.get_sqlite_connection())
+    session_repository = SessionRepository(conn=await SqliteSingleton.get_conn())
 
     while True:
         command = input()
@@ -82,13 +82,6 @@ async def main():
         # de comandos da interface
         if msg == "/quit":
             break
-        elif msg.startswith("/add"):
-            _, filepath = msg.split(" ")
-            content = await utils.read_file(filepath)
-            await doc_repository.upsert_document(
-                name=filepath, content=content, session_id=SESSION_ID   # type: ignore
-            )
-            continue
 
         messages.append(HumanMessage(msg))
 

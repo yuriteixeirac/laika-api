@@ -1,7 +1,9 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class SessionInput(BaseModel):
-    title: Optional[str]
+    title: str
+
+
+class LLMInput(BaseModel):
+    prompt: str

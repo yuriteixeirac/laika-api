@@ -50,8 +50,10 @@ class DocumentRepository:
     async def delete_document(self, name: str, session_id: int) -> None:
         await self._collection.delete(
             where={
-                "session_id": session_id,
-                "name": name
+                "$and": [
+                    {"session_id": session_id},
+                    {"name": name}
+                ]
             }
         )
 
@@ -59,10 +61,11 @@ class DocumentRepository:
         return await self._collection.get(
             where={
                 "session_id": session_id
-            }
+            },
+            include=["metadatas"]
         )
 
-    async def delete_session(self, session_id: int) -> None:
+    async def delete_from_session(self, session_id: int) -> None:
         await self._collection.delete(
             where={
                 "session_id": session_id
