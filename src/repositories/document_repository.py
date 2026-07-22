@@ -4,7 +4,7 @@ from uuid import uuid4
 import chromadb
 from chromadb.api.models.AsyncCollection import AsyncCollection
 
-import utils
+from src import utils
 
 
 class DocumentRepository:

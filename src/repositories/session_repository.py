@@ -2,7 +2,7 @@ from typing import Optional
 
 import aiosqlite
 
-from models.session import Session
+from src.models.session import Session
 
 
 class SessionRepository:
@@ -69,3 +69,10 @@ class SessionRepository:
             )
             await self._conn.commit()
         return session
+
+    async def exists(self, session_id: int) -> bool:
+        async with self._conn.cursor() as cursor:
+            await cursor.execute(
+                "SELECT 1 FROM session WHERE id = ?", (session_id,)
+            )
+            return await cursor.fetchone() is not None

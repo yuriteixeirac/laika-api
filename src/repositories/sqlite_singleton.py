@@ -1,6 +1,6 @@
 import aiosqlite
 
-import utils
+from src import utils
 
 
 class SqliteSingleton:

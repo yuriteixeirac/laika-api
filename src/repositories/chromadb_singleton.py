@@ -2,8 +2,8 @@ import asyncio
 
 import chromadb
 
-from repositories.document_repository import DocumentRepository
-import utils
+from src.repositories.document_repository import DocumentRepository
+from src import utils
 
 _asyncio_lock = asyncio.Lock()
 _document_repository: DocumentRepository | None = None

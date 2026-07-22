@@ -10,7 +10,8 @@ from langchain_ollama import OllamaEmbeddings
 from chromadb.utils.embedding_functions import register_embedding_function
 from chromadb import EmbeddingFunction
 
-from repositories.sqlite_singleton import SqliteSingleton
+from src.repositories.sqlite_singleton import SqliteSingleton
+from src.repositories.session_repository import SessionRepository
 
 
 class ChromaDBConfig(TypedDict):
@@ -68,3 +69,7 @@ async def get_sqlite_connection() -> aiosqlite.Connection:
     await SqliteSingleton.initialize()
 
     return conn
+
+
+async def get_session_repository() -> SessionRepository:
+    return SessionRepository(await get_sqlite_connection())
