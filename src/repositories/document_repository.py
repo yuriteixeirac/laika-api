@@ -2,19 +2,16 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 import chromadb
+from chromadb.api import AsyncClientAPI
 from chromadb.api.models.AsyncCollection import AsyncCollection
 
 from src import utils
 
 
 class DocumentRepository:
-    def __init__(self, client: chromadb.AsyncHttpClient) -> None: # type: ignore
+    def __init__(self, client: AsyncClientAPI, collection: AsyncCollection) -> None: # type: ignore
         self._client = client
-
-    async def initialize(self) -> None:
-        self._collection: AsyncCollection = await self._client.get_or_create_collection(
-            "laika", embedding_function=utils.LaikaEmbeddingFunction()
-        )
+        self._collection = collection
 
     async def upsert_document(self, name: str, content: str, session_id: int) -> None:
         """Inserts or replace a document associated with a session."""

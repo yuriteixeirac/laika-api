@@ -1,4 +1,6 @@
+from src.repositories.agent_singleton import AgentSingleton
+from src.repositories.chromadb_singleton import ChromaDBSingleton
 from src.repositories.document_repository import DocumentRepository
-from src.repositories.chromadb_singleton import get_document_repository
+from src.repositories.message_repository import MessageRepository
 from src.repositories.sqlite_singleton import SqliteSingleton
 from src.repositories.session_repository import SessionRepository

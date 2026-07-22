@@ -1,8 +1,8 @@
 import chromadb
 from langchain.tools import BaseTool, tool
 
-from repositories.chromadb_singleton import get_document_repository
-from repositories.document_repository import DocumentRepository
+from src.repositories.document_repository import DocumentRepository
+from src.repositories.chromadb_singleton import ChromaDBSingleton
 
 
 def make_query_vector_database(document_repository: DocumentRepository) -> BaseTool:
@@ -14,9 +14,12 @@ def make_query_vector_database(document_repository: DocumentRepository) -> BaseT
 
 
 async def load_tools() -> list[BaseTool]:
-    document_repository = await get_document_repository({"host": "localhost", "port": 8000})
+    chroma_conn = await ChromaDBSingleton.get_conn()
+    doc_repo = DocumentRepository(*chroma_conn)
+
+    # MODIFY BY HAND!!!!
     tools: list[BaseTool] = [
-        make_query_vector_database(document_repository),
+        make_query_vector_database(doc_repo),
     ]
 
     return tools
